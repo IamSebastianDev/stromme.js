@@ -44,7 +44,7 @@ export default class Strømme {
 	template(stringLiteral) {
 		// if not existent, add the template tags to the string
 		let templateString =
-			stringLiteral.search(/(<template>)?|(<\/template>)?/gim) == -1
+			stringLiteral.search(/(<template>)?|(<\/template>)?/gim) != -1
 				? `<template> ${stringLiteral} </template>`
 				: stringLiteral;
 
@@ -63,14 +63,10 @@ export default class Strømme {
 	 * @param query - query data passed
 	 * @param data - optional data passed into this create to override data set in the constructor
 	 *
-	 * @returns { Object } - returns an object with the render method and the pure templated string to be used by an external render
-	 *  - output is the parsed string.
-	 *  - render invokes the rendering method.
+	 * @returns { String } - returns the parsed String for further processing
 	 */
 
-	_create(templateString, query, data) {
-		console.log(templateString, query, data);
-
+	_create(templateString, query, data = {}, options) {
 		// compile data - merge the passed data and data passed to the constructor into an object
 
 		let compData = Object.assign(data, this._data);
@@ -134,12 +130,13 @@ export default class Strømme {
 			)
 		);
 
-		// return an object with methods to further process the template
+		// if enabled, strip white space
 
-		return {
-			output: parse,
-			render: this._render.bind(this, parse),
-		};
+		parse = options.stripWhitespace ? parse.replace(/\s/gim, '') : parse;
+
+		// return the parsed string
+
+		return parse;
 	}
 
 	/**
@@ -151,7 +148,7 @@ export default class Strømme {
 	 * @returns { DocumentFragment } - returns a fragment which contents can be appended to the DOM
 	 */
 
-	_render(parsedTemplate) {
+	render(parsedTemplate) {
 		return this._parser
 			.parseFromString(parsedTemplate, 'text/html')
 			.querySelector('template');
@@ -184,14 +181,10 @@ export default class Strømme {
 
 		source = this._findRef(source, data);
 
-		let dataSource;
-
 		// create the datasource
-		if (typeof source == 'array') {
-			dataSource = source;
-		} else if (typeof source == 'object') {
-			dataSource = Object.values(source);
-		}
+
+		let dataSource =
+			typeof source == 'array' ? source : Object.values(source);
 
 		// create the dynamic regexp
 		const REGProp = new RegExp(
@@ -225,15 +218,9 @@ export default class Strømme {
 	 * @param { Object } data - data passed into the function
 	 */
 
-	_handleConditionals(condition, action, negation, alternative, data) {
+	_handleIfElse(condition, action, negation, alternative, data) {
 		// check the condition against the data
-		let checkedCondition = this._parseAndCheck(condition, data);
-
-		if (checkedCondition) {
-			return action;
-		} else if (!checkedCondition) {
-			return alternative;
-		}
+		return this._parseAndCheck(condition, data) ? action : alternative;
 	}
 
 	/**
@@ -248,13 +235,10 @@ export default class Strømme {
 
 		const CHECKREG = /(?<negation>!)?(?<condition>[^!= ]+)\s?((?<operator>[!=]{2})\s?(?<eval>\S*))?/gim;
 
-		let parsedString = [...conditionString.matchAll(CHECKREG)];
+		// match the string and extract the named capture groups
+		let group = [...conditionString.matchAll(CHECKREG)][0].groups;
 
-		let group = parsedString[0].groups;
-
-		let test = {};
-		test.object = context[group.condition];
-		test.value = group.eval;
+		let test = { objevt: context[group.condition], value: group.eval };
 
 		if (
 			test.value == undefined &&
