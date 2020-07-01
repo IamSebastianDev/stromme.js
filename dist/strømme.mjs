@@ -193,8 +193,7 @@ export default class Strømme {
 
 		// create the datasource
 
-		let dataSource =
-			typeof source == 'array' ? source : Object.values(source);
+		let dataSource = Array.isArray(source) ? source : Object.values(source);
 
 		// create the dynamic regexp
 		const REGProp = new RegExp(
@@ -259,17 +258,13 @@ export default class Strømme {
 			switch (exp.assign) {
 				case '<':
 					return itterator < target;
-					break;
 				case '>':
 					return itterator > target;
-					break;
 				case '>=':
 					return itterator >= target;
-					break;
 				case '<=':
 					return itterator <= target;
 				default:
-					break;
 			}
 		};
 
