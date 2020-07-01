@@ -66,7 +66,12 @@ export default class Strømme {
 	 * @returns { String } - returns the parsed String for further processing
 	 */
 
-	_create(templateString, query, data = {}, options) {
+	_create(
+		templateString,
+		query = new URLSearchParams(),
+		data = {},
+		options = {}
+	) {
 		// compile data - merge the passed data and data passed to the constructor into an object
 
 		let compData = Object.assign(data, this._data);
@@ -119,15 +124,21 @@ export default class Strømme {
 			)
 		);
 
-		// parse the forOf expressions
+		const REGARRAY = /{\s?#arr (?<array>[\S]*?) (?<itt>[^=0-9]*?)=(?<init>[0-9]*?)(?<assign><|>|<=|>=){1,2}(?<target>[^=<>]*?) (?<method>[^\s}]*?)\s?}(?<action>[\s\S]*?){\/\s?arr\s?}/gim;
 
-		const REGFOROF = /{\s?#forOf (?<prop>\S*) in (?<object>\S*)\s?}(?<action>[\S\s]*?){\s?\/forOf\s?}/gim;
-
-		parse = parse.replace(REGFOROF, (r, prop, object, action) =>
-			action.replace(
-				action,
-				this._handleExpression(prop, object, action, compData)
-			)
+		parse = parse.replace(
+			REGARRAY,
+			(r, array, itt, init, assign, target, method, action) =>
+				action.replace(
+					action,
+					this._handleIteration(
+						array,
+						{ itt, init, assign, target },
+						method,
+						action,
+						compData
+					)
+				)
 		);
 
 		// if enabled, strip white space
@@ -221,6 +232,22 @@ export default class Strømme {
 	_handleIfElse(condition, action, negation, alternative, data) {
 		// check the condition against the data
 		return this._parseAndCheck(condition, data) ? action : alternative;
+	}
+
+	/**
+	 *
+	 * @param array
+	 * @param expression
+	 * @param method
+	 * @param action
+	 * @param data
+	 */
+
+	_handleIteration(array, expression, method, action, data) {
+		// get array
+		let sourceArray = this._findRef(array, data);
+
+		console.log(expression);
 	}
 
 	/**
