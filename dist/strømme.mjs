@@ -281,8 +281,6 @@ export default class Strømme {
 				/(\+\+|\-\-|\*|\/|\+|\-){1,2}\s?|\s?([0-9]?)?/gim
 			);
 
-			console.log(operation[1]);
-
 			switch (operation[0]) {
 				case '++':
 					itterator++;
@@ -298,7 +296,6 @@ export default class Strømme {
 					break;
 				case '*':
 					itterator *= parseFloat(operation[1]);
-					console.log(itterator);
 					break;
 				case '/':
 					itterator /= parseFloat(operation[1]);
