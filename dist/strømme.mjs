@@ -238,7 +238,7 @@ export default class Strømme {
 		// match the string and extract the named capture groups
 		let group = [...conditionString.matchAll(CHECKREG)][0].groups;
 
-		let test = { objevt: context[group.condition], value: group.eval };
+		let test = { object: context[group.condition], value: group.eval };
 
 		if (
 			test.value == undefined &&
@@ -270,23 +270,11 @@ export default class Strømme {
 
 		const checkFor = (testCase) => {
 			if (testCase.object && testCase.value == undefined) {
-				if (testCase.for == true) {
-					return true;
-				} else {
-					return false;
-				}
+				return testCase.for ? true : false;
 			} else if (testCase.object == testCase.value) {
-				if (testCase.for == true) {
-					return true;
-				} else {
-					return false;
-				}
+				return testCase.for ? true : false;
 			} else if (testCase.object != testCase.value) {
-				if (testCase.for == false) {
-					return true;
-				} else {
-					return false;
-				}
+				return !testCase.for ? true : false;
 			}
 		};
 
