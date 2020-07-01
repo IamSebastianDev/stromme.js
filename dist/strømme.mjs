@@ -7,9 +7,7 @@
  *
  *  features planned & not yet implemented:
  *  elseIf conditionals
- *  nested loops
  *  combinators for conditionals
- *
  *  @license MIT
  */
 
@@ -91,7 +89,7 @@ export default class Strømme {
 		const REGMIX = /{\s?#mixin (?<mixinName>[^}]+?)\s?}/gim;
 
 		parse = parse.replace(REGMIX, (r, mixin) =>
-			r.replace(r, compData.mixins[mixin].compileToMixin)
+			r.replace(r, compData.mixins[mixin].compileToMixin(query))
 		);
 
 		// replace variables with data
@@ -171,10 +169,12 @@ export default class Strømme {
 	 * @param { String } templateString - the templateString of the template Method
 	 */
 
-	_compile(templateString) {
-		// return the template string without the template tags
+	_compile(templateString, query) {
+		let string = this._create(templateString, query);
 
-		return templateString.replace(/<template>|<\/template>/gim, '');
+		console.log(string);
+		// return the template string without the template tags
+		return string.replace(/<template>|<\/template>/gim, '');
 	}
 
 	/**
