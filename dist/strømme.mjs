@@ -16,13 +16,22 @@ export default class Strømme {
 	 *
 	 * @constructor - initializes the template object with data passed into. Data is an optional parameter and will default to an empty object
 	 *
-	 * @param { Object } data
+	 * @param { Object } data - data for the template creation
+	 * @param { Object } options - options for the parser
 	 */
 
-	constructor(data = {}) {
+	constructor(data = {}, options = {}) {
 		// set data
 
 		this._data = data;
+
+		// internal defaults
+		this._internalDefaults = {
+			stripWhitespace: false,
+		};
+
+		// merge options
+		this._options = Object.assign(this._internalDefaults, options);
 	}
 
 	/**
@@ -60,12 +69,7 @@ export default class Strømme {
 	 * @returns { String } - returns the parsed String for further processing
 	 */
 
-	_create(
-		templateString,
-		query = new URLSearchParams(),
-		data = {},
-		options = {}
-	) {
+	_create(templateString, query = new URLSearchParams(), data = {}) {
 		// compile data - merge the passed data and data passed to the constructor into an object
 
 		let compData = Object.assign(data, this._data);
@@ -137,7 +141,9 @@ export default class Strømme {
 
 		// if enabled, strip white space
 
-		parse = options.stripWhitespace ? parse.replace(/\s/gim, '') : parse;
+		parse = this._options.stripWhitespace
+			? parse.replace(/\s/gim, '')
+			: parse;
 
 		// return the parsed string
 
@@ -200,7 +206,7 @@ export default class Strømme {
 
 		// return the dataSource processed
 		return dataSource
-			.map((elem, i) =>
+			.map((elem) =>
 				// extract the variable capture group
 				action.replace(REGProp, (r, group) =>
 					//replace the group with the data out of the reference
@@ -305,7 +311,7 @@ export default class Strømme {
 
 		// itterate
 		while (checkResult()) {
-			// do stuff
+			// replace action with data and push to the string
 			propString.push(action.replace(REGProp, srcArr[itterator]));
 
 			// manipulate the itterator
