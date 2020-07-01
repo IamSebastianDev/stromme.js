@@ -164,9 +164,11 @@ export default class Strømme {
 	 * @private Method to convert a created string to pure HTML for appending a mixin
 	 *
 	 * @param { String } templateString - the templateString of the template Method
+	 * @param { URLSearchParams } query - query data passed to the mixin from the parent
 	 */
 
 	_compile(templateString, query) {
+		// create the sting
 		let string = this._create(templateString, query);
 
 		// return the template string without the template tags
