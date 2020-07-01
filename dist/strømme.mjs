@@ -2,13 +2,12 @@
 
 /**
  *
- * 	Strømme v.0.5.0
+ * 	Strømme v.0.6.0
  * 	Templating engine for Røut.js
  *
  *  features planned & not yet implemented:
  *  elseIf conditionals
  *  nested loops
- *  indices in array loops
  *  combinators for conditionals
  *
  *  @license MIT
@@ -124,7 +123,7 @@ export default class Strømme {
 			)
 		);
 
-		const REGARRAY = /{\s?#arr (?<array>[\S]*?) (?<itt>[^=0-9]*?)=(?<init>[0-9]*?)(?<assign><|>|<=|>=){1,2}(?<target>[^=<>]*?) (?<method>[^\s}]*?)\s?}(?<action>[\s\S]*?){\/\s?arr\s?}/gim;
+		const REGARRAY = /{\s?#arr (?<array>[\S]*?) (?<itt>[^=0-9]*?)=(?<init>[^=<>]*?)(?<assign><|>|<=|>=){1,2}(?<target>[^=<>]*?) (?<method>[^\s}]*?)\s?}(?<action>[\s\S]*?){\/\s?arr\s?}/gim;
 
 		parse = parse.replace(
 			REGARRAY,
@@ -235,19 +234,99 @@ export default class Strømme {
 	}
 
 	/**
+	 * @private Method to handle index arrays
 	 *
-	 * @param array
-	 * @param expression
-	 * @param method
-	 * @param action
-	 * @param data
+	 * @param array - the datasourced array
+	 * @param expression - the index method, consisting of the itterator, the inital value, the operation sign and the target value
+	 * @param method - the way the itterator is advanced
+	 * @param action - the action capture group
+	 * @param data - data passed into the function
 	 */
 
-	_handleIteration(array, expression, method, action, data) {
-		// get array
-		let sourceArray = this._findRef(array, data);
+	_handleIteration(array, exp, method, action, data) {
+		// find the array to itterate over
+		let srcArr = this._findRef(array, data);
 
-		console.log(expression);
+		// create the itterator
+		let itterator =
+			exp.init == 'length' ? srcArr.length : parseFloat(exp.init);
+
+		let target =
+			exp.target == 'length' ? srcArr.length : parseFloat(exp.target);
+
+		console.log(itterator, target);
+
+		// helper function to compare the itterator and the value
+		const checkResult = () => {
+			switch (exp.assign) {
+				case '<':
+					return itterator < target;
+					break;
+				case '>':
+					return itterator > target;
+					break;
+				case '>=':
+					return itterator >= target;
+					break;
+				case '<=':
+					return itterator <= target;
+				default:
+					break;
+			}
+		};
+
+		// helper function to operate on the iterator according to the final expression of the for loop
+		const manipulateItt = (method) => {
+			const expression = method.replace(exp.itt, '');
+
+			let operation = expression.match(
+				/(\+\+|\-\-|\*|\/|\+|\-){1,2}\s?|\s?([0-9]?)?/gim
+			);
+
+			console.log(operation[1]);
+
+			switch (operation[0]) {
+				case '++':
+					itterator++;
+					break;
+				case '--':
+					itterator--;
+					break;
+				case '+':
+					itterator += parseFloat(operation[1]);
+					break;
+				case '-':
+					itterator -= parseFloat(operation[1]);
+					break;
+				case '*':
+					itterator *= parseFloat(operation[1]);
+					console.log(itterator);
+					break;
+				case '/':
+					itterator /= parseFloat(operation[1]);
+					break;
+				default:
+					break;
+			}
+		};
+
+		// create a reagular expression to check for the itterator
+		const REGProp = new RegExp(`{-\\s?\\S*?\\[${exp.itt}\\]\\s?-}`, 'gmi');
+
+		// create the container array where the calculated strings are stored
+		let propString = [];
+
+		// itterate
+		while (checkResult()) {
+			// do stuff
+			propString.push(action.replace(REGProp, srcArr[itterator]));
+
+			// manipulate the itterator
+			manipulateItt(method);
+		}
+
+		// join the strings and return to append
+		return propString.join('');
 	}
 
 	/**
