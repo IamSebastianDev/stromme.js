@@ -23,9 +23,6 @@ export default class Strømme {
 		// set data
 
 		this._data = data;
-
-		// initialize a new DOMParser API instance for later use
-		this._DOMParser = new DOMParser();
 	}
 
 	/**
@@ -149,15 +146,15 @@ export default class Strømme {
 
 	/**
 	 *
-	 * @private Method to convert the template string into a DOM Fragment
+	 * @private static Method to convert the template string into a DOM Fragment
 	 *
 	 * @param { String } parsedTemplate - The parsed template string
 	 *
 	 * @returns { DocumentFragment } - returns a fragment which contents can be appended to the DOM
 	 */
 
-	render(parsedTemplate) {
-		return this._parser
+	static render(parsedTemplate) {
+		return new DOMParser()
 			.parseFromString(parsedTemplate, 'text/html')
 			.querySelector('template');
 	}
@@ -192,7 +189,7 @@ export default class Strømme {
 		source = this._findRef(source, data);
 
 		// create the datasource
-
+		console.log(Array.isArray(source));
 		let dataSource = Array.isArray(source) ? source : Object.values(source);
 
 		// create the dynamic regexp
