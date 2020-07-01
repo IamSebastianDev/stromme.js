@@ -169,7 +169,6 @@ export default class Strømme {
 	_compile(templateString, query) {
 		let string = this._create(templateString, query);
 
-		console.log(string);
 		// return the template string without the template tags
 		return string.replace(/<template>|<\/template>/gim, '');
 	}
@@ -189,7 +188,6 @@ export default class Strømme {
 		source = this._findRef(source, data);
 
 		// create the datasource
-		console.log(Array.isArray(source));
 		let dataSource = Array.isArray(source) ? source : Object.values(source);
 
 		// create the dynamic regexp
