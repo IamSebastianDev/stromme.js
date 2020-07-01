@@ -254,8 +254,6 @@ export default class Strømme {
 		let target =
 			exp.target == 'length' ? srcArr.length : parseFloat(exp.target);
 
-		console.log(itterator, target);
-
 		// helper function to compare the itterator and the value
 		const checkResult = () => {
 			switch (exp.assign) {
@@ -323,6 +321,11 @@ export default class Strømme {
 
 			// manipulate the itterator
 			manipulateItt(method);
+
+			// exit loop after 10000 iterations
+			if (itterator > 10000 || itterator < -10000) {
+				break;
+			}
 		}
 
 		// join the strings and return to append
